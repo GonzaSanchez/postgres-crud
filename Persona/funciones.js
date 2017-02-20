@@ -17,6 +17,31 @@ const config = {
 //and set a limit of maximum 10 idle clients
 const pool = new pg.Pool(config);
 
+function InsertPersona(nombrePersona) {
+  const results = [];
+
+  pool.connect((err, client, done) => {
+    if(err) {
+      return console.error('errrrrror', err);
+    }
+    try {
+      client.query('INSERT INTO public."PERSONA"(NOMBRE_PERSONA) VALUES($1)',[nombrePersona]);
+      const query = client.query('SELECT * FROM public."PERSONA"');
+      // Stream results back one row at a time
+      query.on('row', (row) => {
+        results.push(row);
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+  })
+
+  pool.on('error', (err, client) => {
+    console.error('idle client error', err.message, err.stack);
+  });
+}
+
 function SelectPersonas(callback) {
   var arrIds = [];
 
@@ -25,7 +50,7 @@ function SelectPersonas(callback) {
       return console.error('errrrrror', err);
     }
 
-    client.query('SELECT * FROM public."PERSONA"', (err, result) => {
+    client.query('SELECT * FROM public."PERSONA" ORDER BY ID_PERSONA', (err, result) => {
       done();
 
       if(err) {
@@ -46,29 +71,40 @@ function SelectPersonas(callback) {
   });
 }
 
-function InsertPersona(nombrePersonas) {
-  const results = [];
-
+function ModificarPersona(nombrePersona, idPersona, callback) {
   pool.connect((err, client, done) => {
-    if(err) {
-      return console.error('errrrrror', err);
-    }
-    try {
-      client.query('INSERT INTO public."PERSONA"(NOMBRE_PERSONA) VALUES($1)',[nombrePersonas]);
-      const query = client.query('SELECT * FROM public."PERSONA"');
-      // Stream results back one row at a time
-      query.on('row', (row) => {
-        results.push(row);
-      });
-    } catch (e) {
-      console.log(e);
-    }
+    if(err)
+      return console.log('error: ' + err);
 
-  })
+      client.query('UPDATE public."PERSONA" SET NOMBRE_PERSONA = $1 WHERE ID_PERSONA = $2', [nombrePersona, idPersona], () => {
+        if(typeof callback === 'function')
+          callback();
+      });
+
+
+  });
 
   pool.on('error', (err, client) => {
     console.error('idle client error', err.message, err.stack);
   });
 }
 
-module.exports = {GetListaPersonas: SelectPersonas, AgregarPersona: InsertPersona}
+function EliminarPersona(idPersona, callback){
+  pool.connect((err, client, done) => {
+    if(err)
+      return console.log('error: '+ err);
+
+      client.query('DELETE FROM public."PERSONA" WHERE ID_PERSONA = $1', [idPersona], () => {
+        if(typeof callback === 'function')
+          callback();
+      })
+  });
+
+  pool.on('error', (err, client) => {
+    console.error('idle client error', err.message, err.stack);
+  });
+}
+
+
+
+module.exports = {GetListaPersonas: SelectPersonas, AgregarPersona: InsertPersona, ModificarPersona: ModificarPersona, EliminarPersona: EliminarPersona}
