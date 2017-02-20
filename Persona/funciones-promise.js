@@ -18,23 +18,7 @@ const config = {
 
 var db = pgp(config);
 
-function GetListaPersonasPromise()
-{
-    return new Promise((resolve, reject) => {
-      db.any('select * from public."PERSONA"')
-          .then(function (data) {
-              resolve(data);
-          })
-          .catch(function (error) {
-              console.log("ERROR:", error.message); // print the error;
-          })
-          .finally(function () {
-              pgp.end(); // for immediate app exit, closing the connection pool.
-          });
-    });
-}
-
-function InsertarPersona(nombrePersona)
+function InsertPersonaPromise(nombrePersona)
 {
     return new Promise((resolve, reject) => {
       db.any('INSERT INTO public."PERSONA"(NOMBRE_PERSONA) VALUES($1)', [nombrePersona])
@@ -50,5 +34,53 @@ function InsertarPersona(nombrePersona)
     });
 }
 
+function GetListaPersonasPromise()
+{
+    return new Promise((resolve, reject) => {
+      db.any('select * from public."PERSONA" ORDER BY id_persona')
+          .then(function (data) {
+              resolve(data);
+          })
+          .catch(function (error) {
+              console.log("ERROR:", error.message); // print the error;
+          })
+          .finally(function () {
+              pgp.end(); // for immediate app exit, closing the connection pool.
+          });
+    });
+}
 
-module.exports = {GetListaPersonasPromise: GetListaPersonasPromise, InsertarPersona: InsertarPersona}
+function UpdatePersonaPromise(nombrePersona, idPersona)
+{
+    return new Promise((resolve, reject) => {
+      db.any('UPDATE public."PERSONA" SET NOMBRE_PERSONA = $1 WHERE ID_PERSONA = $2', [nombrePersona, idPersona], [nombrePersona, idPersona])
+          .then(function () {
+              resolve();
+          })
+          .catch(function (error) {
+              console.log("ERROR:", error.message); // print the error;
+          })
+          .finally(function () {
+              pgp.end(); // for immediate app exit, closing the connection pool.
+          });
+    });
+}
+
+function DeletePersonaPromise(idPersona)
+{
+    return new Promise((resolve, reject) => {
+      db.any('DELETE FROM public."PERSONA" WHERE ID_PERSONA = $1', [idPersona])
+          .then(function () {
+              resolve();
+          })
+          .catch(function (error) {
+              console.log("ERROR:", error.message); // print the error;
+          })
+          .finally(function () {
+              pgp.end(); // for immediate app exit, closing the connection pool.
+          });
+    });
+}
+
+
+module.exports = {GetListaPersonasPromise: GetListaPersonasPromise, InsertPersonaPromise: InsertPersonaPromise, UpdatePersonaPromise: UpdatePersonaPromise, DeletePersonaPromise: DeletePersonaPromise}

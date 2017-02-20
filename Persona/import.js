@@ -7,3 +7,11 @@ var select = require('./funciones-promise');
 });*/
 
 /*select.AgregarPersona('GONZALO');*/
+
+
+
+select.DeletePersonaPromise(8).then(() => {
+  select.GetListaPersonasPromise().then((data) => {
+    console.log(data);
+  });
+})
