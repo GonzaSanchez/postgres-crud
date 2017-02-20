@@ -10,8 +10,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
-var router = express.Router();
-
 router.get('/lista-personas', (req, res) => {
   select.GetListaPersonas((listaNombres) => {
     var tdNombres = '';
