@@ -21,8 +21,8 @@ var db = pgp(config);
 function InsertPersonaPromise(nombrePersona)
 {
     return new Promise((resolve, reject) => {
-      db.any('INSERT INTO public."PERSONA"(NOMBRE_PERSONA) VALUES($1)', [nombrePersona])
-          .then(function (data) {
+      db.none('INSERT INTO public."PERSONA"(NOMBRE_PERSONA) VALUES($1)', [nombrePersona])
+          .then(function () {
               resolve();
           })
           .catch(function (error) {
